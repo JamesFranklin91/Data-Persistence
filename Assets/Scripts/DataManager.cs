@@ -1,16 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class DataManager : MonoBehaviour
 {
     public static DataManager Instance;
 
-    private string playerName;
+    public string playerName;
+    public string highScoringPlayerName;
+    public int highScore;
+
+    private string HIGHSCORE_SAVE_PATH;
 
     private void Awake()
     {
-        if(Instance == null)
+        HIGHSCORE_SAVE_PATH = Application.persistentDataPath + "/highscore.json";
+
+        if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
@@ -18,15 +25,42 @@ public class DataManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        LoadHighScore();
     }
 
-    public string getPlayerName()
+    [System.Serializable]
+    class HighScore
     {
-        return playerName;
+        public string playerName;
+        public int highScore;
     }
 
-    public void setPlayerName(string playerName)
+    public void SaveHighScore(int score)
     {
-        this.playerName = playerName;
+        HighScore data = new HighScore();
+        data.playerName = playerName;
+        data.highScore = score;
+
+        string json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(HIGHSCORE_SAVE_PATH, json);
+    }
+
+    public void LoadHighScore()
+    {
+        if (File.Exists(HIGHSCORE_SAVE_PATH))
+        {
+            string json = File.ReadAllText(HIGHSCORE_SAVE_PATH);
+
+            HighScore data = JsonUtility.FromJson<HighScore>(json);
+
+            highScoringPlayerName = data.playerName;
+            highScore = data.highScore;
+        } else
+        {
+            highScoringPlayerName = "n/a";
+            highScore = 0;
+        }
     }
 }

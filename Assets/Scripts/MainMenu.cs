@@ -15,7 +15,7 @@ public class MainMenu : MonoBehaviour
 
     public void StartGame()
     {
-        if (DataManager.Instance != null && DataManager.Instance.getPlayerName() != "")
+        if (DataManager.Instance != null && DataManager.Instance.playerName != "")
         {
             SceneManager.LoadScene(1);
         }
@@ -25,7 +25,7 @@ public class MainMenu : MonoBehaviour
     {
         if (DataManager.Instance != null)
         {
-            DataManager.Instance.setPlayerName(nameInput.text);
+            DataManager.Instance.playerName = nameInput.text;
         }
     }
 }
