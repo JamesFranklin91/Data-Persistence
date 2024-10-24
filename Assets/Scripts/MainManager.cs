@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Linq;
+using static DataManager;
 
 public class MainManager : MonoBehaviour
 {
@@ -36,9 +38,8 @@ public class MainManager : MonoBehaviour
             }
         }
 
-        DataManager.Instance.LoadHighScore();
-        HighScoreText.text = $"High Score -> {DataManager.Instance.highScoringPlayerName}: {DataManager.Instance.highScore}";
-        ScoreText.text = $"{DataManager.Instance.playerName}'s Score : {m_Points}";
+        Instance.LoadHighScores();
+        ScoreText.text = $"{Instance.playerName}'s Score : {m_Points}";
     }
 
     private void Update()
@@ -68,17 +69,33 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"{DataManager.Instance.playerName}'s Score : {m_Points}";
+        ScoreText.text = $"{Instance.playerName}'s Score : {m_Points}";
     }
 
     public void GameOver()
     {
-        if (m_Points > DataManager.Instance.highScore)
+        List<HighScore> newHighScores = new List<HighScore>(Instance.highScores);
+
+        if(newHighScores.Count < 10)
         {
-            DataManager.Instance.SaveHighScore(m_Points);
-            HighScoreText.text = $"High Score -> {DataManager.Instance.playerName}: {m_Points}";
+            newHighScores.Add(new HighScore(Instance.playerName, m_Points));
+            newHighScores.Sort((a, b) => b.highScore - a.highScore);
         }
+        else if(m_Points > newHighScores.Last().highScore)
+        {
+            newHighScores.RemoveAt(newHighScores.Count - 1);
+            newHighScores.Add(new HighScore(Instance.playerName, m_Points));
+            newHighScores.Sort((a, b) => b.highScore - a.highScore);
+        }
+
+        Instance.SaveHighScores(newHighScores);
+
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    public void GoToHighScores()
+    {
+        SceneManager.LoadScene(2);
     }
 }
